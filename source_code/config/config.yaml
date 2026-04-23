@@ -1,0 +1,177 @@
+# CS2CO系统配置文件
+# 系统动态脆弱性标量（SDVS）模型配置
+
+system:
+  name: "CS2CO System"
+  version: "1.0.0"
+  environment: "production"
+  debug: false
+  log_level: "INFO"
+
+database:
+  # MySQL数据库配置
+  mysql:
+    host: "localhost"
+    port: 3306
+    database: "cs2co_system"
+    username: "cs2co_user"
+    password: "secure_password_here"
+    pool_size: 10
+    max_overflow: 20
+    echo_sql: false
+
+  # Redis缓存配置
+  redis:
+    host: "localhost"
+    port: 6379
+    db: 0
+    password: ""
+    max_connections: 50
+
+sdvs_model:
+  # SDVS模型基础参数
+  alpha: 0.5           # 拓扑重要性与经济后果的权重系数 [0, 1]
+  gamma: 1.0           # 脆弱性对输入变化的敏感度形状参数 (>0)
+  mu: 0.5              # 可替代性衰减系数 (>0)
+
+  # 脆弱性等级阈值
+  vulnerability_thresholds:
+    critical: 0.7      # 紧急阈值
+    high: 0.5          # 高阈值
+    medium: 0.3        # 中阈值
+    low: 0.1           # 低阈值
+
+  # 健康因子计算参数
+  health_factor:
+    weibull_shape_range: [1.5, 3.0]    # 威布尔形状参数范围
+    weibull_scale_base: 10000.0        # 威布尔尺度参数基准值（小时）
+    environmental_factor_range: [0.8, 1.5]  # 环境恶劣因子范围
+
+reinforcement_learning:
+  # MacDec-POMDP配置
+  macdec_pomdp:
+    num_agents: 10                     # 智能体数量
+    state_dim: 128                     # 状态维度
+    action_dim: 16                     # 动作维度
+    hidden_dim: 256                    # 隐藏层维度
+
+  # 训练参数
+  training:
+    episodes: 10000                    # 训练回合数
+    steps_per_episode: 200             # 每回合最大步数
+    learning_rate: 0.001               # 学习率
+    gamma: 0.99                        # 折扣因子
+    tau: 0.005                         # 软更新参数
+    batch_size: 128                    # 批量大小
+    memory_size: 100000                # 经验回放缓冲区大小
+
+  # 安全约束参数
+  safety_constraints:
+    max_inventory_cost: 1000000.0      # 最大库存成本约束（元）
+    min_service_level: 0.95            # 最低服务水平约束
+    max_maintenance_delay: 72          # 最大维护延迟约束（小时）
+
+optimization:
+  # 库存优化参数
+  inventory:
+    order_lead_time_buffer: 1.2        # 订购提前期缓冲系数
+    safety_stock_multiplier: 1.5       # 安全库存乘数
+    reorder_interval_days: 30          # 再订购间隔（天）
+    max_backorder_days: 14             # 最大延迟交货天数
+
+  # 调度优化参数
+  scheduling:
+    time_horizon_days: 30              # 调度时间范围（天）
+    time_slot_minutes: 60              # 时间槽大小（分钟）
+    max_parallel_maintenance: 3        # 最大并行维护数
+    cost_weight: 0.6                   # 成本权重
+    efficiency_weight: 0.3             # 效率权重
+    reliability_weight: 0.1            # 可靠性权重
+
+api:
+  # FastAPI配置
+  fastapi:
+    host: "0.0.0.0"
+    port: 8000
+    workers: 4
+    reload: false
+
+  # CORS配置
+  cors:
+    allow_origins: ["http://localhost:3000"]
+    allow_credentials: true
+    allow_methods: ["*"]
+    allow_headers: ["*"]
+
+  # 认证配置
+  auth:
+    secret_key: "your-secret-key-here-change-in-production"
+    algorithm: "HS256"
+    access_token_expire_minutes: 30
+    refresh_token_expire_days: 7
+
+logging:
+  # 日志配置
+  file_path: "logs/cs2co_system.log"
+  max_file_size_mb: 100
+  backup_count: 10
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+  # 日志级别
+  levels:
+    root: "INFO"
+    sqlalchemy: "WARNING"
+    uvicorn: "INFO"
+    api: "DEBUG"
+
+monitoring:
+  # Prometheus指标配置
+  prometheus:
+    enabled: true
+    port: 9090
+    scrape_interval_seconds: 15
+
+  # 健康检查配置
+  health_check:
+    enabled: true
+    endpoint: "/health"
+    check_database: true
+    check_redis: true
+    check_disk_space: true
+    min_disk_space_gb: 10
+
+industry_adapters:
+  # 煤炭行业适配器配置
+  coal_mining:
+    component_types:
+      - "采煤机"
+      - "液压支架"
+      - "刮板输送机"
+      - "皮带输送机"
+      - "破碎机"
+    criticality_ranges:
+      critical: [0.8, 1.0]
+      high: [0.6, 0.8]
+      medium: [0.4, 0.6]
+      low: [0.0, 0.4]
+
+  # 工程机械行业适配器配置
+  construction_machinery:
+    component_types:
+      - "挖掘机"
+      - "装载机"
+      - "起重机"
+      - "压路机"
+      - "混凝土泵车"
+    criticality_ranges:
+      critical: [0.7, 1.0]
+      high: [0.5, 0.7]
+      medium: [0.3, 0.5]
+      low: [0.0, 0.3]
+
+# 实验性功能配置
+experimental:
+  enable_transfer_learning: true       # 启用迁移学习
+  enable_online_adaptation: true       # 启用在线自适应
+  enable_concept_drift_detection: true # 启用概念漂移检测
+  enable_multi_objective_optimization: true # 启用多目标优化
