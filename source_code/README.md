@@ -50,7 +50,7 @@ cs2co_system/
 ### 安装步骤
 ```bash
 # 1. 克隆项目
-git clone https://github.com/your-org/cs2co-system.git
+git clone https://github.com/kingroad5299/cs2co-system.git
 cd cs2co-system
 
 # 2. 创建虚拟环境
